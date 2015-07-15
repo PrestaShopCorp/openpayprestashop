@@ -43,8 +43,9 @@ class OpenpayPrestashop extends PaymentModule
 
 		$this->name = 'openpayprestashop';
 		$this->tab = 'payments_gateways';
-		$this->version = '1.6.1';
+		$this->version = '1.6.2';
 		$this->author = 'Openpay SAPI de CV';
+		$this->module_key = "23c1a97b2718ec0aec28bb9b3b2fc6d5";
 
 		parent::__construct();
 		$backward_compatibility_url = 'http://addons.prestashop.com/en/modules-prestashop/6222-backwardcompatibility.html';
@@ -778,7 +779,7 @@ class OpenpayPrestashop extends PaymentModule
 
 		$this->context->smarty->assign(array(
 			'receipt' => $this->_path.'views/img/recibo.png',
-			'openpay_form_link' => Tools::safeOutput($_SERVER['REQUEST_URI']),
+			'openpay_form_link' => $_SERVER['REQUEST_URI'],
 			'openpay_configuration' => Configuration::getMultiple(
 					array(
 						'OPENPAY_MODE',
