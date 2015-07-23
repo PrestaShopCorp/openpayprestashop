@@ -46,7 +46,7 @@ if ($json->type == 'charge.succeeded' && ($json->transaction->method == 'store' 
 		$order_history->addWithemail();
 
 		Db::getInstance()->Execute(
-				'UPDATE '._DB_PREFIX_.'openpay_transaction SET status = "paid" WHERE id_transaction = "'.$json->transaction->id.'"'
+				'UPDATE '._DB_PREFIX_.'openpay_transaction SET status = "paid" WHERE id_transaction = "'.(int)$json->transaction->id.'"'
 		);
 	}
 }

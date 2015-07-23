@@ -64,24 +64,23 @@
                 </div>
             </div>
 
-            <br>
-            <form data-ajax="false" action="{$validation_url|escape:'htmlall':'UTF-8'}" method="POST" id="openpay-cash-form">
-                <input type="hidden" name="payment_method" value="store" id="payment_method">
-                <p class="cart_navigation" id="cart_navigation">
-                    <button type="submit"  class="button btn btn-default button-medium" {if $total >= '10000'} disabled style="cursor: not-allowed;" {/if}>
-                        <span>
-                            {l s='Generar ficha de pago' mod='openpayprestashop'}
-                            <i class="icon-chevron-right right"></i>
-                        </span>
-                    </button>
-                </p>
-
-            </form>
         </div>
     </div>
 
-    <p class="cart_navigation" id="cart_navigation">
-        <a href="{$link->getPageLink('order', true, NULL, "step=3")|escape:'htmlall':'UTF-8'}" class="button-exclusive btn btn-default"><i class="icon-chevron-left"></i> Otros modos de pago </a>
-    </p>
+    <form data-ajax="false" action="{$validation_url|escape:'htmlall':'UTF-8'}" method="POST" id="openpay-cash-form">
+        <input type="hidden" name="payment_method" value="store" id="payment_method">
+        <p class="cart_navigation mt30">
+            <a href="{$link->getPageLink('order', true, NULL, "step=3")|escape:'htmlall':'UTF-8'}" class="button-exclusive btn btn-default"><i class="icon-chevron-left"></i> Otros modos de pago </a>
+
+            <button type="submit"  class="button btn btn-default button-medium" {if $total >= '10000'} disabled style="cursor: not-allowed;" {/if}>
+                <span>
+                    {l s='Generar ficha de pago' mod='openpayprestashop'}
+                    <i class="icon-chevron-right right"></i>
+                </span>
+            </button>
+
+        </p>
+
+    </form>
 
 {/if}
