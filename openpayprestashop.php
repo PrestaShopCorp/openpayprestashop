@@ -135,7 +135,7 @@ class OpenpayPrestashop extends PaymentModule
 		$names = array();
 
 		foreach ($languages as $lang)
-			$names[$lang['id_lang']] = 'Awaiting payment';
+			$names[$lang['id_lang']] = $this->l('Awaiting payment');
 
 		$state->name = $names;
 		$state->color = '#4169E1';
@@ -396,7 +396,7 @@ class OpenpayPrestashop extends PaymentModule
 			switch ($payment_method)
 			{
 				case 'card':
-					$display_name = 'Openpay card payment';
+					$display_name = $this->l('Openpay card payment');
 					$result_json = $this->cardPayment($token, $device_session_id);
 					$order_status = (int)Configuration::get('PS_OS_PAYMENT');
 
@@ -407,7 +407,7 @@ class OpenpayPrestashop extends PaymentModule
 					break;
 
 				case 'store':
-					$display_name = 'Openpay cash payment';
+					$display_name = $this->l('Openpay cash payment');
 					$content = '&content_only=1';
 					$result_json = $this->othersPayment($payment_method);
 					$order_status = (int)Configuration::get('waiting_cash_payment');
@@ -422,7 +422,7 @@ class OpenpayPrestashop extends PaymentModule
 					break;
 
 				case 'bank_account':
-					$display_name = 'Openpay bank payment';
+					$display_name = $this->l('Openpay bank payment');
 					$content = '&content_only=1';
 					$result_json = $this->othersPayment($payment_method);
 					$order_status = (int)Configuration::get('waiting_cash_payment');
