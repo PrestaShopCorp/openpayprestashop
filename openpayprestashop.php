@@ -265,11 +265,6 @@ class OpenpayPrestashop extends PaymentModule
 			$this->context->cookie->__set('openpay_error', null);
 		}
 
-		$domain = (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'];
-		$this->smarty->assign(
-				'validation_url', $domain.__PS_BASE_URI__.'index.php?process=validation&fc=module&module=openpayprestashop&controller=default'
-		);
-
 		$this->smarty->assign('module_configured', $this->getMerchantInfo());
 		$this->smarty->assign('amount', $this->context->cart->getOrderTotal());
 		$this->smarty->assign('card', Configuration::get('OPENPAY_CARDS'));
@@ -319,13 +314,14 @@ class OpenpayPrestashop extends PaymentModule
 
 				$this->smarty->assign(
 						'openpay_order', array(
+							'order' => $id_order,
 							'barcode' => $transaction['reference'],
 							'barcode_url' => $transaction['barcode'],
 							'amount' => number_format($transaction['amount'], 2),
 							'currency' => $transaction['currency'],
 							'email' => $customer->email,
-							'date' => date('d/m/Y', strtotime($transaction['date_add'])),
-							'due_date' => $this->getLongGlobalDateFormat($transaction['due_date']),
+							'date' => Tools::displayDate($transaction['date_add'], (int)$this->context->language->id, true),
+							'due_date' => Tools::displayDate($transaction['due_date'], (int)$this->context->language->id, true),
 							'logo' => '/img/'.Configuration::get('PS_LOGO'),
 							'shop_email' => $shop_email,
 							'phone' => Configuration::get('BLOCKCONTACTINFOS_PHONE'),
@@ -351,7 +347,7 @@ class OpenpayPrestashop extends PaymentModule
 							'amount' => number_format($transaction['amount'], 2),
 							'currency' => $transaction['currency'],
 							'shop_name' => Configuration::get('PS_SHOP_NAME'),
-							'due_date' => $this->getLongGlobalDateFormat($transaction['due_date']),
+							'due_date' => Tools::displayDate($transaction['due_date'], (int)$this->context->language->id, true),
 							'email' => $shop_email,
 							'phone' => Configuration::get('BLOCKCONTACTINFOS_PHONE'),
 							'bg_color' => Configuration::get('OPENPAY_BACKGROUND_COLOR'),
@@ -445,7 +441,7 @@ class OpenpayPrestashop extends PaymentModule
 					$this->l('Payment method:').' '.Tools::ucfirst($payment_method)."\n".
 					$message_aux.
 					$this->l('Amount:').' $'.number_format($result_json->amount, 2).' '.Tools::strtoupper($result_json->currency)."\n".
-					//$this->l('Status:').' '.($result_json->status == 'completed' ? $this->l('Paid') : $this->l('Unpaid'))."\n".
+					$this->l('Status:').' '.($result_json->status == 'completed' ? $this->l('Paid') : $this->l('Unpaid'))."\n".
 					$this->l('Processed on:').' '.date('Y-m-d H:i:s')."\n".
 					$this->l('Mode:').' '.(Configuration::get('OPENPAY_MODE') == 'true' ? $this->l('Live') : $this->l('Test'))."\n";
 
@@ -883,7 +879,7 @@ class OpenpayPrestashop extends PaymentModule
 		}
 		catch (Exception $e)
 		{
-			$this->error($e);
+			return $this->error($e, true);
 		}
 	}
 
@@ -925,8 +921,6 @@ class OpenpayPrestashop extends PaymentModule
 
 	public function copyMailTemplate()
 	{
-		$html_file_origin = _PS_MODULE_DIR_.$this->name.'/mails/es/openpayprestashop.html';
-		$txt_file_origin = _PS_MODULE_DIR_.$this->name.'/mails/es/openpayprestashop.txt';
 		$directory = _PS_MAIL_DIR_;
 		if ($dhvalue = opendir($directory))
 		{
@@ -934,13 +928,38 @@ class OpenpayPrestashop extends PaymentModule
 			{
 				if (is_dir($directory.$file) && $file[0] != '.')
 				{
-					$html_file_destination = $directory.$file.'/openpayprestashop.html';
-					if (!Tools::copy($html_file_origin, $html_file_destination))
-						throw new Exception;
 
+					$html_file_origin = _PS_MODULE_DIR_.$this->name.'/mails/'.$file.'/openpayprestashop.html';
+					$txt_file_origin = _PS_MODULE_DIR_.$this->name.'/mails/'.$file.'/openpayprestashop.txt';
+
+					/*
+					 * If origin files does not exist, skip the loop
+					 */
+					if (!file_exists($html_file_origin) && !file_exists($txt_file_origin))
+						continue;
+
+					$html_file_destination = $directory.$file.'/openpayprestashop.html';
 					$txt_file_destination = $directory.$file.'/openpayprestashop.txt';
-					if (!Tools::copy($txt_file_origin, $txt_file_destination))
-						throw new Exception;
+
+					/*
+					 * Tools::copy function does not supported in PrestaShop 1.4.X.X
+					 */
+					if (_PS_VERSION_ < '1.5')
+					{
+						if (!copy($html_file_origin, $html_file_destination))
+							throw new Exception;
+
+						if (!copy($txt_file_origin, $txt_file_destination))
+							throw new Exception;
+					}
+					else
+					{
+						if (!Tools::copy($html_file_origin, $html_file_destination))
+							throw new Exception;
+
+						if (!Tools::copy($txt_file_origin, $txt_file_destination))
+							throw new Exception;
+					}
 
 				}
 			}

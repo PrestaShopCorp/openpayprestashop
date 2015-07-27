@@ -33,7 +33,7 @@
     <div class="openpay-module-wrap">
         <div class="openpay-module-col1 floatRight">
             <div class="openpay-module-wrap-video">
-                <h3>{l s='Benefits' mod='openpayprestashop'}</h3>
+                <h3>{l s='Management panel' mod='openpayprestashop'}</h3>
                 <p>{l s='We have an administration panel where you can check your business transactions.' mod='openpayprestashop'}</p>
                 <a target="_blank" href="http://www.openpay.mx"><img src="{$module_dir|escape:'htmlall':'UTF-8'}views/img/openpay-dashboard.png" alt="openpay dashboard" class="openpay-dashboard" /></a>
                 <hr>
@@ -137,7 +137,7 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <h3><h3>{l s='Fee for successful transaction' mod='openpayprestashop'}</h3></h3>
+                        <h3>{l s='Fee for successful transaction' mod='openpayprestashop'}</h3>
                         <p class="comision">{l s='$8 MXN' mod='openpayprestashop'}</p>
                     </div>
                 </div>
