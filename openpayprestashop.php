@@ -31,7 +31,6 @@ class OpenpayPrestashop extends PaymentModule
 {
 	private $error = array();
 	private $validation = array();
-	protected $backward = false;
 
 	public function __construct()
 	{
@@ -48,7 +47,6 @@ class OpenpayPrestashop extends PaymentModule
 		$this->module_key = '23c1a97b2718ec0aec28bb9b3b2fc6d5';
 
 		parent::__construct();
-		$backward_compatibility_url = 'http://addons.prestashop.com/en/modules-prestashop/6222-backwardcompatibility.html';
 		$warning = 'All the Openpay transaction details saved in your database will be deleted. Are you sure you want uninstall this module?';
 		$this->displayName = $this->l('Openpay');
 		$this->description = $this->l('Accept payments by credit-debit card, cash payments and via SPEI with Openpay');
@@ -56,19 +54,8 @@ class OpenpayPrestashop extends PaymentModule
 
 		/* Backward compatibility */
 		if (_PS_VERSION_ < '1.5')
-		{
-			$this->backward_error = $this->l('In order to work properly in PrestaShop v1.4, the Openpay module requires the backward compatibility')
-					.'<br />'.$this->l('You can download this module for free here: '.$backward_compatibility_url);
-			if (file_exists(_PS_MODULE_DIR_.'backwardcompatibility/backward_compatibility/backward.php'))
-			{
-				include(_PS_MODULE_DIR_.'backwardcompatibility/backward_compatibility/backward.php');
-				$this->backward = true;
-			}
-			else
-				$this->warning = $this->backward_error;
-		}
-		else
-			$this->backward = true;
+			require(_PS_MODULE_DIR_.$this->name.'/backward_compatibility/backward.php');
+
 	}
 
 	/**
@@ -78,12 +65,6 @@ class OpenpayPrestashop extends PaymentModule
 	 */
 	public function install()
 	{
-		if (!$this->active && _PS_VERSION_ < 1.5)
-		{
-			echo '<div class="error">'.Tools::safeOutput($this->backward_error).'</div>';
-			return false;
-		}
-
 		/* For 1.4.3 and less compatibility */
 		$update_config = array(
 			'PS_OS_CHEQUE' => 1,
@@ -614,11 +595,6 @@ class OpenpayPrestashop extends PaymentModule
 		$tests['configuration'] = array(
 			'name' => $this->l('You must sign-up for Openpay and configure your account settings in the module (publishable key, secret key...etc.)'),
 			'result' => $this->getMerchantInfo());
-
-		if (_PS_VERSION_ < 1.5)
-			$tests['backward'] = array(
-				'name' => $this->l('You are using the backward compatibility module'),
-				'result' => $this->backward, 'resolution' => $this->backward_error);
 
 		foreach ($tests as $k => $test)
 			if ($k != 'result' && !$test['result'])
