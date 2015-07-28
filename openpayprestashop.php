@@ -52,10 +52,6 @@ class OpenpayPrestashop extends PaymentModule
 		$this->description = $this->l('Accept payments by credit-debit card, cash payments and via SPEI with Openpay');
 		$this->confirmUninstall = $this->l($warning);
 
-		/* Backward compatibility */
-		if (_PS_VERSION_ < '1.5')
-			require(_PS_MODULE_DIR_.$this->name.'/backward_compatibility/backward.php');
-
 	}
 
 	/**
@@ -469,18 +465,11 @@ class OpenpayPrestashop extends PaymentModule
 				));
 
 			/** Redirect the user to the order confirmation page history */
-			if (_PS_VERSION_ < 1.5)
-				$redirect = __PS_BASE_URI__.'order-confirmation.php?id_cart='.(int)$this->context->cart->id.
-						$content.
-						'&id_module='.(int)$this->id.
-						'&id_order='.(int)$this->currentOrder.
-						'&key='.$this->context->customer->secure_key;
-			else
-				$redirect = __PS_BASE_URI__.'index.php?controller=order-confirmation&id_cart='.(int)$this->context->cart->id.
-						$content.
-						'&id_module='.(int)$this->id.
-						'&id_order='.(int)$this->currentOrder.
-						'&key='.$this->context->customer->secure_key;
+			$redirect = __PS_BASE_URI__.'index.php?controller=order-confirmation&id_cart='.(int)$this->context->cart->id.
+					$content.
+					'&id_module='.(int)$this->id.
+					'&id_order='.(int)$this->currentOrder.
+					'&key='.$this->context->customer->secure_key;
 
 			Tools::redirect($redirect);
 			exit;
@@ -917,26 +906,11 @@ class OpenpayPrestashop extends PaymentModule
 					$html_file_destination = $directory.$file.'/openpayprestashop.html';
 					$txt_file_destination = $directory.$file.'/openpayprestashop.txt';
 
-					/*
-					 * Tools::copy function does not supported in PrestaShop 1.4.X.X
-					 */
-					if (_PS_VERSION_ < '1.5')
-					{
-						if (!copy($html_file_origin, $html_file_destination))
-							throw new Exception;
+					if (!Tools::copy($html_file_origin, $html_file_destination))
+						throw new Exception;
 
-						if (!copy($txt_file_origin, $txt_file_destination))
-							throw new Exception;
-					}
-					else
-					{
-						if (!Tools::copy($html_file_origin, $html_file_destination))
-							throw new Exception;
-
-						if (!Tools::copy($txt_file_origin, $txt_file_destination))
-							throw new Exception;
-					}
-
+					if (!Tools::copy($txt_file_origin, $txt_file_destination))
+						throw new Exception;
 				}
 			}
 			closedir($dhvalue);
