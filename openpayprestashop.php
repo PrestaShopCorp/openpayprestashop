@@ -51,7 +51,7 @@ class OpenpayPrestashop extends PaymentModule
 		$this->displayName = $this->l('Openpay');
 		$this->description = $this->l('Accept payments by credit-debit card, cash payments and via SPEI with Openpay');
 		$this->confirmUninstall = $this->l($warning);
-
+		$this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
 	}
 
 	/**
