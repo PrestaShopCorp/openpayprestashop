@@ -876,7 +876,63 @@ class OpenpayPrestashop extends PaymentModule
 
 	public function error($e, $backend = false)
 	{
-		$error = 'ERROR '.$e->getErrorCode().'. '.$e->getMessage();
+		/* 6001 el webhook ya existe */
+		switch ($e->getErrorCode())
+		{
+			/* ERRORES GENERALES */
+			case '1000':
+			case '1004':
+			case '1005':
+				$msg = $this->l('Service not available.');
+				break;
+
+			/* ERRORES TARJETA */
+			case '3001':
+			case '3004':
+			case '3005':
+			case '3007':
+				$msg = $this->l('The card was declined.');
+				break;
+
+			case '3002':
+				$msg = $this->l('The card has expired.');
+				break;
+
+			case '3003':
+				$msg = $this->l('The card does not have sufficient funds');
+				break;
+
+			case '3006':
+				$msg = $this->l('The operation is not permitted for this client or this transaction.');
+				break;
+
+			case '3008':
+				$msg = $this->l('The card is not supported on online transactions.');
+				break;
+
+			case '3009':
+				$msg = $this->l('The card was reported lost.');
+				break;
+
+			case '3010':
+				$msg = $this->l('The bank has restricted the card.');
+				break;
+
+			case '3011':
+				$msg = $this->l('The bank has requested that the card is retained. Contact the bank.');
+				break;
+
+			case '3012':
+				$msg = $this->l('Ask the bank is required to make this payment authorization.');
+				break;
+
+			default: /* Demás errores 400 */
+				$msg = $this->l('The request could not be processed.');
+				break;
+		}
+
+		$error = 'ERROR '.$e->getErrorCode().'. '.$msg;
+		//$error = 'ERROR '.$e->getErrorCode().'. '.$e->getMessage();
 
 		if ($backend)
 			return Tools::jsonDecode(Tools::jsonEncode(array('error' => $e->getErrorCode(), 'msg' => $error)), false);
