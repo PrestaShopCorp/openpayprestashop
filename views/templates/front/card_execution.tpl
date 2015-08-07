@@ -148,7 +148,9 @@
 
             OpenPay.setId(openpay_merchant_id);
             OpenPay.setApiKey(openpay_public_key);
-            OpenPay.setSandboxMode(mode);
+
+            if(mode == "0")
+                OpenPay.setSandboxMode(true);
 
             //antifraudes
             OpenPay.deviceData.setup("openpay-payment-form", "device_session_id");

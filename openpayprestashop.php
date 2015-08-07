@@ -146,7 +146,7 @@ class OpenpayPrestashop extends PaymentModule
 		return Db::getInstance()->Execute('
 		CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'openpay_customer` (
                     `id_openpay_customer` int(10) unsigned NOT NULL AUTO_INCREMENT,
-                    `openpay_customer_id` varchar(32) NOT NULL,
+                    `openpay_customer_id` varchar(32) NULL,
                     `id_customer` int(10) unsigned NOT NULL,
                     `date_add` datetime NOT NULL,
                     PRIMARY KEY (`id_openpay_customer`),
@@ -445,23 +445,25 @@ class OpenpayPrestashop extends PaymentModule
 				}
 			}
 
+			$fee = ($result_json->amount * 0.029) + 2.5;
+
 			/** Store the transaction details */
 			if ($result_json->id)
 				Db::getInstance()->insert('openpay_transaction', array(
-					'type' => $payment_method,
+					'type' => pSQL($payment_method),
 					'id_cart' => (int)$this->context->cart->id,
 					'id_order' => (int)$this->currentOrder,
 					'id_transaction' => pSQL($result_json->id),
-					'amount' => $result_json->amount,
-					'status' => ($result_json->status == 'completed' ? 'paid' : 'unpaid'),
-					'fee' => (($result_json->amount * 0.029) + 2.5),
+					'amount' => (float)$result_json->amount,
+					'status' => pSQL($result_json->status == 'completed' ? 'paid' : 'unpaid'),
+					'fee' => (float)$fee,
 					'currency' => pSQL($result_json->currency),
-					'mode' => (Configuration::get('OPENPAY_MODE') == 'true' ? 'live' : 'test'),
+					'mode' => pSQL(Configuration::get('OPENPAY_MODE') == 'true' ? 'live' : 'test'),
 					'date_add' => date('Y-m-d H:i:s'),
-					'due_date' => ($result_json->due_date) ? $result_json->due_date : null,
-					'barcode' => $barcode_url,
-					'reference' => $reference,
-					'clabe' => $clabe
+					'due_date' => pSQL(($result_json->due_date) ? $result_json->due_date : null),
+					'barcode' => pSQL($barcode_url),
+					'reference' => pSQL($reference),
+					'clabe' => pSQL($clabe)
 				));
 
 			/** Redirect the user to the order confirmation page history */
@@ -735,11 +737,31 @@ class OpenpayPrestashop extends PaymentModule
 		{
 			try
 			{
+
+				$address = Db::getInstance()->getRow('
+                    SELECT *
+                    FROM '._DB_PREFIX_.'address
+                    WHERE id_customer = '.(int)$customer_id);
+
+				$state = Db::getInstance()->getRow('
+                    SELECT id_country, name
+                    FROM '._DB_PREFIX_.'state
+                    WHERE id_state = '.(int)$address['id_state']);
+
 				$customer_data = array(
+					'requires_account' => false,
 					'name' => $customer->firstname,
 					'last_name' => $customer->lastname,
 					'email' => $customer->email,
-					'requires_account' => false
+					'phone_number' => $address['phone'],
+					'address' => array(
+						'line1' => $address['address1'],
+						'line2' => $address['address2'],
+						'postal_code' => $address['postcode'],
+						'city' => $address['city'],
+						'state' => $state['name'],
+						'country_code' => 'MX'
+					)
 				);
 
 				$customer_openpay = $this->createOpenpayCustomer($customer_data);
@@ -932,7 +954,6 @@ class OpenpayPrestashop extends PaymentModule
 		}
 
 		$error = 'ERROR '.$e->getErrorCode().'. '.$msg;
-		//$error = 'ERROR '.$e->getErrorCode().'. '.$e->getMessage();
 
 		if ($backend)
 			return Tools::jsonDecode(Tools::jsonEncode(array('error' => $e->getErrorCode(), 'msg' => $error)), false);
