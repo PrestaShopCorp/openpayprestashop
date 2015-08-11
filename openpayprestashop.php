@@ -95,6 +95,7 @@ class OpenpayPrestashop extends PaymentModule
 				Configuration::updateValue('OPENPAY_CARDS', 1) &&
 				Configuration::updateValue('OPENPAY_STORES', 1) &&
 				Configuration::updateValue('OPENPAY_SPEI', 1) &&
+				Configuration::updateValue('OPENPAY_WEBHOOK_ID', null) &&
 				Configuration::updateValue('OPENPAY_BACKGROUND_COLOR', '#003A5B') &&
 				Configuration::updateValue('OPENPAY_FONT_COLOR', '#ffffff') &&
 				$this->installDb();
@@ -190,6 +191,9 @@ class OpenpayPrestashop extends PaymentModule
 				Configuration::deleteByName('OPENPAY_PRIVATE_KEY_LIVE') &&
 				Configuration::deleteByName('OPENPAY_DEADLINE_STORES') &&
 				Configuration::deleteByName('OPENPAY_DEADLINE_SPEI') &&
+				Configuration::deleteByName('OPENPAY_WEBHOOK_ID')	&&
+				Configuration::deleteByName('OPENPAY_WEBHOOK_USER') &&
+				Configuration::deleteByName('OPENPAY_WEBHOOK_PASSWORD') &&
 				Configuration::deleteByName('OPENPAY_CARDS') &&
 				Configuration::deleteByName('OPENPAY_STORES') &&
 				Configuration::deleteByName('OPENPAY_SPEI') &&
@@ -620,6 +624,8 @@ class OpenpayPrestashop extends PaymentModule
 					'OPENPAY_PRIVATE_KEY_LIVE' => trim(Tools::getValue('openpay_private_key_live')),
 					'OPENPAY_DEADLINE_STORES' => trim(Tools::getValue('openpay_deadline_stores')),
 					'OPENPAY_DEADLINE_SPEI' => trim(Tools::getValue('openpay_deadline_spei')),
+					'OPENPAY_WEBHOOK_USER' => trim(Tools::getValue('openpay_webhook_user')),
+					'OPENPAY_WEBHOOK_PASSWORD' => trim(Tools::getValue('openpay_webhook_password')),
 					'OPENPAY_CARDS' => Tools::getValue('openpay_cards'),
 					'OPENPAY_STORES' => Tools::getValue('openpay_stores'),
 					'OPENPAY_SPEI' => Tools::getValue('openpay_spei'),
@@ -690,6 +696,8 @@ class OpenpayPrestashop extends PaymentModule
 						'OPENPAY_PRIVATE_KEY_LIVE',
 						'OPENPAY_DEADLINE_STORES',
 						'OPENPAY_DEADLINE_SPEI',
+						'OPENPAY_WEBHOOK_USER',
+						'OPENPAY_WEBHOOK_PASSWORD',
 						'OPENPAY_CARDS',
 						'OPENPAY_STORES',
 						'OPENPAY_SPEI',
@@ -837,6 +845,8 @@ class OpenpayPrestashop extends PaymentModule
 		$domain = (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'];
 		$webhook_data = array(
 			'url' => $domain.__PS_BASE_URI__.'modules/openpayprestashop/notification.php',
+			'user' => 'fede',
+			'password' => 'xxx',
 			'event_types' => array(
 				'verification',
 				'charge.succeeded',
