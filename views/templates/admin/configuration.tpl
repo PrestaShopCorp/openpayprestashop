@@ -151,7 +151,14 @@
         <table cellspacing="0" cellpadding="0" class="openpay-technical">
             {if $openpay_validation}
                 {foreach from=$openpay_validation item=validation}
-                    {html_entity_decode($validation|escape:'htmlall':'UTF-8')}
+                    <tr>
+                        <td>
+                            <img src="../img/admin/{($validation['result']|escape:'htmlall':'UTF-8') ? 'ok' : 'forbbiden'}.gif" alt="" />
+                        </td>
+                        <td>
+                            {$validation['name']|escape:'htmlall':'UTF-8'}
+                        </td>
+                    </tr>
                 {/foreach}
             {/if}
         </table>
@@ -188,47 +195,27 @@
                         <table cellspacing="0" cellpadding="0" class="innerTable">
                             <tr>
                                 <td align="left" valign="middle">{l s='Sandbox merchant ID' mod='openpayprestashop'}</td>
-                                <td align="left" valign="middle"><input type="text" name="openpay_merchant_id_test" value="{if $openpay_configuration.OPENPAY_MERCHANT_ID_TEST}{$openpay_configuration.OPENPAY_MERCHANT_ID_TEST|escape:'htmlall':'UTF-8'}{/if}" /></td>
+                                <td align="left" valign="middle"><input autocomplete="off" type="text" name="openpay_merchant_id_test" value="{if $openpay_configuration.OPENPAY_MERCHANT_ID_TEST}{$openpay_configuration.OPENPAY_MERCHANT_ID_TEST|escape:'htmlall':'UTF-8'}{/if}" /></td>
                                 <td width="15"></td>
                                 <td width="15" class="vertBorder"></td>
                                 <td align="left" valign="middle">{l s='Live merchant ID' mod='openpayprestashop'}</td>
-                                <td align="left" valign="middle"><input type="text" name="openpay_merchant_id_live" value="{if $openpay_configuration.OPENPAY_MERCHANT_ID_LIVE}{$openpay_configuration.OPENPAY_MERCHANT_ID_LIVE|escape:'htmlall':'UTF-8'}{/if}" /></td>
+                                <td align="left" valign="middle"><input autocomplete="off" type="text" name="openpay_merchant_id_live" value="{if $openpay_configuration.OPENPAY_MERCHANT_ID_LIVE}{$openpay_configuration.OPENPAY_MERCHANT_ID_LIVE|escape:'htmlall':'UTF-8'}{/if}" /></td>
                             </tr>
                             <tr>
                                 <td align="left" valign="middle">{l s='Sandbox priavate key' mod='openpayprestashop'}</td>
-                                <td align="left" valign="middle"><input type="password" name="openpay_private_key_test" value="{if $openpay_configuration.OPENPAY_PRIVATE_KEY_TEST}{$openpay_configuration.OPENPAY_PRIVATE_KEY_TEST|escape:'htmlall':'UTF-8'}{/if}" /></td>
+                                <td align="left" valign="middle"><input autocomplete="off" type="password" name="openpay_private_key_test" value="{if $openpay_configuration.OPENPAY_PRIVATE_KEY_TEST}{$openpay_configuration.OPENPAY_PRIVATE_KEY_TEST|escape:'htmlall':'UTF-8'}{/if}" /></td>
                                 <td width="15"></td>
                                 <td width="15" class="vertBorder"></td>
                                 <td align="left" valign="middle">{l s='Live priavate key' mod='openpayprestashop'}</td>
-                                <td align="left" valign="middle"><input type="password" name="openpay_private_key_live" value="{if $openpay_configuration.OPENPAY_PRIVATE_KEY_LIVE}{$openpay_configuration.OPENPAY_PRIVATE_KEY_LIVE|escape:'htmlall':'UTF-8'}{/if}" /></td>
+                                <td align="left" valign="middle"><input autocomplete="off" type="password" name="openpay_private_key_live" value="{if $openpay_configuration.OPENPAY_PRIVATE_KEY_LIVE}{$openpay_configuration.OPENPAY_PRIVATE_KEY_LIVE|escape:'htmlall':'UTF-8'}{/if}" /></td>
                             </tr>
                             <tr>
                                 <td align="left" valign="middle">{l s='Sandbox public key' mod='openpayprestashop'}</td>
-                                <td align="left" valign="middle"><input type="text" name="openpay_public_key_test" value="{if $openpay_configuration.OPENPAY_PUBLIC_KEY_TEST}{$openpay_configuration.OPENPAY_PUBLIC_KEY_TEST|escape:'htmlall':'UTF-8'}{/if}" /></td>
+                                <td align="left" valign="middle"><input autocomplete="off" type="text" name="openpay_public_key_test" value="{if $openpay_configuration.OPENPAY_PUBLIC_KEY_TEST}{$openpay_configuration.OPENPAY_PUBLIC_KEY_TEST|escape:'htmlall':'UTF-8'}{/if}" /></td>
                                 <td width="15"></td>
                                 <td width="15" class="vertBorder"></td>
                                 <td align="left" valign="middle">{l s='Live piblic key' mod='openpayprestashop'}</td>
-                                <td align="left" valign="middle"><input type="text" name="openpay_public_key_live" value="{if $openpay_configuration.OPENPAY_PUBLIC_KEY_LIVE}{$openpay_configuration.OPENPAY_PUBLIC_KEY_LIVE|escape:'htmlall':'UTF-8'}{/if}" /></td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <h3 style="margin-bottom: 0;">{l s='Webhook authentication' mod='openpayprestashop'}</h3>
-                        <p style="margin-top: 0; font-style: italic; ">{l s='Required data for payments notifications' mod='openpayprestashop'}</p>
-                        <table cellspacing="0" cellpadding="0" class="innerTable">
-                            <tr>
-                                <td valign="middle" align="left">{l s='User (required field)' mod='openpayprestashop'}</td>
-                                <td valign="middle" align="left">
-                                    <input type="text" name="openpay_webhook_user" value="{if $openpay_configuration.OPENPAY_WEBHOOK_USER}{$openpay_configuration.OPENPAY_WEBHOOK_USER|escape:'htmlall':'UTF-8'}{/if}">
-                                </td>
-                                <td width="15"></td>
-                                <td class="vertBorder" width="15"></td>
-                                <td valign="middle" align="left">{l s='Password (required field)' mod='openpayprestashop'}</td>
-                                <td valign="middle" align="left">
-                                    <input type="password" name="openpay_webhook_password" value="{if $openpay_configuration.OPENPAY_WEBHOOK_PASSWORD}{$openpay_configuration.OPENPAY_WEBHOOK_PASSWORD|escape:'htmlall':'UTF-8'}{/if}">
-                                </td>
+                                <td align="left" valign="middle"><input autocomplete="off" type="text" name="openpay_public_key_live" value="{if $openpay_configuration.OPENPAY_PUBLIC_KEY_LIVE}{$openpay_configuration.OPENPAY_PUBLIC_KEY_LIVE|escape:'htmlall':'UTF-8'}{/if}" /></td>
                             </tr>
                         </table>
                     </td>
@@ -246,6 +233,9 @@
                                 </td>
                                 <td align="left" valign="middle">
                                     <input type="checkbox" name="openpay_spei" id="openpay_spei" value="1" {if $openpay_configuration.OPENPAY_SPEI == 1} checked="checked" {/if}> {l s='Bank payment' mod='openpayprestashop'}
+                                </td>
+                                <td align="left" valign="middle">
+                                    <input type="checkbox" name="openpay_bitcoins" id="openpay_bitcoins" value="1" {if $openpay_configuration.OPENPAY_BITCOINS == 1} checked="checked" {/if}> {l s='Bitcoins' mod='openpayprestashop'}
                                 </td>
                             </tr>
                         </table>
