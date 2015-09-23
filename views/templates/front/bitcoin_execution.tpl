@@ -85,13 +85,4 @@
             </button>
         </p>
     </form>
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-
-
-
-        });
-    </script>
-
 {/if}
