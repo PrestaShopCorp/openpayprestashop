@@ -24,17 +24,18 @@
  *  International Registered Trademark & Property of PrestaShop SA
  */
 
-if (!defined('_PS_VERSION_'))
+if (!defined('_PS_VERSION_')) {
     exit;
+}
 
 function upgrade_module_1_6_3($object)
-{    
+{
     return (Configuration::deleteByName('OPENPAY_WEBHOOK_ID') &&
         Configuration::updateValue('OPENPAY_BITCOINS', 1) &&
         Configuration::updateValue('OPENPAY_WEBHOOK_ID_TEST', null) &&
         Configuration::updateValue('OPENPAY_WEBHOOK_ID_LIVE', null) &&
         Db::getInstance()->Execute(
-            'ALTER TABLE `'._DB_PREFIX_.'openpay_transaction` CHANGE `type` `type` ENUM( \'card\',\'store\',\'bank_account\', \'bitcoin\' ) NOT NULL'
+            'ALTER TABLE `' . _DB_PREFIX_ . 'openpay_transaction` CHANGE `type` `type` ENUM( \'card\',\'store\',\'bank_account\', \'bitcoin\' ) NOT NULL'
         )
     );
 }
