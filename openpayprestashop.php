@@ -429,10 +429,10 @@ class OpenpayPrestashop extends PaymentModule
                     $content = '&content_only=1';
                     $result_json = $this->bitcoinPayment();
                     $order_status = (int) Configuration::get('waiting_cash_payment');
-                    
+
                     $mail_detail = '<br/><span style="color:#333"><strong>DIrección de pago:</strong></span> '.$result_json->payment_method->payment_address.'<br />
                             <span style="color:#333"><strong>Monto Bitcoin:</strong></span> '.$result_json->payment_method->amount_bitcoins.' BTC';
-                    
+
                     $message_aux = $this->l('Amount Bitcoin:').' '.$result_json->payment_method->amount_bitcoins."\n".
                             $this->l('Payment address:').' '.$result_json->payment_method->payment_address."\n";
 
@@ -824,21 +824,25 @@ class OpenpayPrestashop extends PaymentModule
                     FROM '._DB_PREFIX_.'state
                     WHERE id_state = '.(int) $address['id_state']);
 
+
                 $customer_data = array(
                     'requires_account' => false,
                     'name' => $customer->firstname,
                     'last_name' => $customer->lastname,
                     'email' => $customer->email,
                     'phone_number' => $address['phone'],
-                    'address' => array(
+                );
+
+                if (isset($address['address1']) && isset($address['city']) && isset($state['name'])) {
+                    $customer_data['address'] = array(
                         'line1' => $address['address1'],
                         'line2' => $address['address2'],
                         'postal_code' => $address['postcode'],
                         'city' => $address['city'],
                         'state' => $state['name'],
                         'country_code' => 'MX'
-                    )
-                );
+                    );
+                }
 
                 $customer_openpay = $this->createOpenpayCustomer($customer_data);
 
