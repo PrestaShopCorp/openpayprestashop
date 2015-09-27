@@ -833,7 +833,7 @@ class OpenpayPrestashop extends PaymentModule
                     'phone_number' => $address['phone'],
                 );
 
-                if (isset($address['address1']) && isset($address['city']) && isset($state['name'])) {
+                if (isset($address['address1']) && isset($address['postcode']) && isset($address['city']) && isset($state['name'])) {
                     $customer_data['address'] = array(
                         'line1' => $address['address1'],
                         'line2' => $address['address2'],
