@@ -974,11 +974,21 @@ class OpenpayPrestashop extends PaymentModule
         $password = '';
 
         $ch = curl_init();
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE); 
+        curl_setopt($ch, CURLOPT_CAINFO, _PS_MODULE_DIR_.$this->name.'/lib/data/cacert.pem');
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-        $result = curl_exec($ch);
+        $result = curl_exec($ch);        
+
+        if (curl_exec($ch) === false) {
+            Logger::addLog('Curl error '.curl_errno($ch).': '.curl_error($ch), 1, null, null, null, true);
+        } else {
+            $info = curl_getinfo($ch);
+            Logger::addLog('HTTP code '.$info['http_code'].' on request to '.$info['url'], 1, null, null, null, true);
+        }
+
         curl_close($ch);
 
         $array = Tools::jsonDecode($result, true);
