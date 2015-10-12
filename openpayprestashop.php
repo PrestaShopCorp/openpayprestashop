@@ -100,7 +100,7 @@ class OpenpayPrestashop extends PaymentModule
                 Configuration::updateValue('OPENPAY_BITCOINS', 1) &&
                 Configuration::updateValue('OPENPAY_WEBHOOK_ID_TEST', null) &&
                 Configuration::updateValue('OPENPAY_WEBHOOK_ID_LIVE', null) &&
-                Configuration::updateValue('OPENPAY_WEBHOOK_USER', Configuration::get('PS_SHOP_NAME')) &&
+                Configuration::updateValue('OPENPAY_WEBHOOK_USER', Tools::substr(md5(uniqid(rand(), true)), 0, 10)) &&
                 Configuration::updateValue('OPENPAY_WEBHOOK_PASSWORD', Tools::substr(md5(uniqid(rand(), true)), 0, 10)) &&
                 Configuration::updateValue('OPENPAY_BACKGROUND_COLOR', '#003A5B') &&
                 Configuration::updateValue('OPENPAY_FONT_COLOR', '#ffffff') &&
@@ -375,21 +375,10 @@ class OpenpayPrestashop extends PaymentModule
                 $template = './views/templates/hook/card_order_confirmation.tpl';
                 break;
 
-            default:
-                $merchant_id = Configuration::get('OPENPAY_MODE') ? Configuration::get('OPENPAY_MERCHANT_ID_LIVE') : Configuration::get('OPENPAY_MERCHANT_ID_TEST');
-
-                $this->smarty->assign(array(
-                    'merchant_id' => $merchant_id,
-                    'logo' => '/img/'.Configuration::get('PS_LOGO'),
-                    'transaction_id' => $transaction['id_transaction'],
-                    'mode' => Configuration::get('OPENPAY_MODE'),
-                ));
-
-                $this->context->controller->addJS('https://openpay.s3.amazonaws.com/openpay.v1.min.js');
-                $this->context->controller->addJS('https://openpay.s3.amazonaws.com/openpay-bitcoin.v1.min.js');
+            case 'bitcoin':
                 $template = './views/templates/hook/bitcoin_order_confirmation.tpl';
                 break;
-                
+
         }
 
         return $this->display(__FILE__, $template);
@@ -400,7 +389,7 @@ class OpenpayPrestashop extends PaymentModule
      *
      * @param string $token Openpay Transaction ID (token)
      */
-    public function processPayment($payment_method, $token = null, $device_session_id = null)
+    public function processPayment($payment_method, $token = null, $device_session_id = null, $transaction = null)
     {
         if (!$this->active) {
             return;
@@ -426,17 +415,27 @@ class OpenpayPrestashop extends PaymentModule
 
                     break;
 
-                case 'bitcoin':
-                    $display_name = $this->l('Openpay Bitcoin payment');
-                    $content = '&content_only=1';
+                case 'bitcoin_transaction':
+
                     $result_json = $this->bitcoinPayment();
+                    $redirect = $this->context->link->getModuleLink('openpayprestashop', 'bitcoinwaiting', array('transaction' => $result_json->id));
+                    Tools::redirect($redirect);
+
+                    break;
+                
+                case 'bitcoin':
+
+                    $openpay_customer = $this->getOpenpayCustomer($this->context->cookie->id_customer);
+                    $result_json = $this->getOpenpayCharge($openpay_customer, $transaction);
+                    $display_name = $this->l('Openpay Bitcoin payment');
                     $order_status = (int) Configuration::get('waiting_cash_payment');
 
-                    $mail_detail = '<br/><span style="color:#333"><strong>DIrección de pago:</strong></span> '.$result_json->payment_method->payment_address.'<br />
+                    $mail_detail = '<br/><strong>Estamos confirmando tu pago</strong><br/>'.
+                            '<span style="color:#333"><strong>Dirección de pago:</strong></span> '.$result_json->payment_method->payment_address.'<br />
                             <span style="color:#333"><strong>Monto Bitcoin:</strong></span> '.$result_json->payment_method->amount_bitcoins.' BTC';
 
                     $message_aux = $this->l('Amount Bitcoin:').' '.$result_json->payment_method->amount_bitcoins."\n".
-                            $this->l('Payment address:').' '.$result_json->payment_method->payment_address."\n";
+                        $this->l('Payment address:').' '.$result_json->payment_method->payment_address."\n";
 
                     break;
 
@@ -556,6 +555,7 @@ class OpenpayPrestashop extends PaymentModule
             exit;
         }
     }
+    
 
     public function cardPayment($token, $device_session_id)
     {
@@ -585,8 +585,7 @@ class OpenpayPrestashop extends PaymentModule
         $charge_request = array(
             'method' => 'bitcoin',
             'amount' => $cart->getOrderTotal(),
-            'description' => $this->l('PrestaShop Cart ID:').' '.(int) $cart->id,
-            'order_id' => (int) $cart->id
+            'description' => $cart->id
         );
 
         $result_json = $this->createOpenpayCharge($openpay_customer, $charge_request);
@@ -906,6 +905,23 @@ class OpenpayPrestashop extends PaymentModule
             $this->error($e);
         }
     }
+    
+    
+    public function getOpenpayCharge($customer, $transaction_id)
+    {
+        $pk = Configuration::get('OPENPAY_MODE') ? Configuration::get('OPENPAY_PRIVATE_KEY_LIVE') : Configuration::get('OPENPAY_PRIVATE_KEY_TEST');
+        $id = Configuration::get('OPENPAY_MODE') ? Configuration::get('OPENPAY_MERCHANT_ID_LIVE') : Configuration::get('OPENPAY_MERCHANT_ID_TEST');
+
+        Openpay::getInstance($id, $pk);
+        Openpay::setProductionMode(Configuration::get('OPENPAY_MODE'));
+
+        try {
+            $charge = $customer->charges->get($transaction_id);
+            return $charge;
+        } catch (Exception $e) {
+            $this->error($e);
+        }
+    }
 
     public function createWebhook()
     {
@@ -974,13 +990,13 @@ class OpenpayPrestashop extends PaymentModule
         $password = '';
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE); 
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
         curl_setopt($ch, CURLOPT_CAINFO, _PS_MODULE_DIR_.$this->name.'/lib/data/cacert.pem');
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-        $result = curl_exec($ch);        
+        $result = curl_exec($ch);
 
         if (curl_exec($ch) === false) {
             Logger::addLog('Curl error '.curl_errno($ch).': '.curl_error($ch), 1, null, null, null, true);
