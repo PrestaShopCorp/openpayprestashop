@@ -73,7 +73,7 @@ if ($_SERVER['PHP_AUTH_USER'] == $auth_user && $_SERVER['PHP_AUTH_PW'] == $auth_
             $order_history->addWithemail();
 
             Db::getInstance()->Execute(
-                'UPDATE '._DB_PREFIX_.'openpay_transaction SET status = "paid" WHERE id_transaction = "'.$json->transaction->id.'"'
+                'UPDATE '._DB_PREFIX_.'openpay_transaction SET status = "paid" WHERE id_transaction = "'.pSQL($json->transaction->id).'"'
             );
         } else {
             Logger::addLog('NO ORDER', 1, null, null, null, true);

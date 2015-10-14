@@ -613,7 +613,7 @@ class OpenpayPrestashop extends PaymentModule
 
         $charge_request = array(
             'method' => $payment_method,
-            'currency' => $this->context->currency->iso_code,
+            //'currency' => $this->context->currency->iso_code,
             'amount' => $cart->getOrderTotal(),
             'description' => $this->l('PrestaShop Cart ID:').' '.(int) $cart->id,
             'order_id' => (int) $cart->id,
