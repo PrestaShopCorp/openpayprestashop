@@ -836,7 +836,7 @@ class OpenpayPrestashop extends PaymentModule
                     'phone_number' => $address['phone'],
                 );
 
-                if (isset($address['address1']) && isset($address['postcode']) && isset($address['city']) && isset($state['name'])) {
+                if (!$this->isNullOrEmpty($address['address1']) && !$this->isNullOrEmpty($address['postcode']) && !$this->isNullOrEmpty($address['city']) && !$this->isNullOrEmpty($state['name'])) {
                     $customer_data['address'] = array(
                         'line1' => $address['address1'],
                         'line2' => $address['address2'],
@@ -845,6 +845,8 @@ class OpenpayPrestashop extends PaymentModule
                         'state' => $state['name'],
                         'country_code' => 'MX'
                     );
+                    $string_array = http_build_query($customer_data, '', ', ');
+                    Logger::addLog($this->l('Customer Address: ').$string_array, 1, null, 'Cart', (int) $this->context->cart->id, true);
                 }
 
                 $customer_openpay = $this->createOpenpayCustomer($customer_data);
@@ -1085,6 +1087,11 @@ class OpenpayPrestashop extends PaymentModule
         } else {
             throw new Exception($error);
         }
+    }
+    
+    public function isNullOrEmpty($string)
+    {
+        return (!isset($string) || trim($string) === '');
     }
 
     public function copyMailTemplate()
