@@ -33,6 +33,7 @@ class OpenpayPrestashop extends PaymentModule
 
     private $error = array();
     private $validation = array();
+    private $limited_currencies = array('MXN');
 
     public function __construct()
     {
@@ -45,7 +46,7 @@ class OpenpayPrestashop extends PaymentModule
 
         $this->name = 'openpayprestashop';
         $this->tab = 'payments_gateways';
-        $this->version = '1.6.3';
+        $this->version = '2.0.0';
         $this->author = 'Openpay SAPI de CV';
         $this->module_key = '23c1a97b2718ec0aec28bb9b3b2fc6d5';
 
@@ -268,6 +269,10 @@ class OpenpayPrestashop extends PaymentModule
     public function hookPayment()
     {
         if (!$this->active) {
+            return;
+        }
+        
+        if (!$this->checkCurrency()) {
             return;
         }
 
@@ -613,7 +618,6 @@ class OpenpayPrestashop extends PaymentModule
 
         $charge_request = array(
             'method' => $payment_method,
-            'currency' => $this->context->currency->iso_code,
             'amount' => $cart->getOrderTotal(),
             'description' => $this->l('PrestaShop Cart ID:').' '.(int) $cart->id,
             'order_id' => (int) $cart->id,
@@ -782,17 +786,15 @@ class OpenpayPrestashop extends PaymentModule
         return $this->display(__FILE__, 'views/templates/admin/configuration.tpl');
     }
 
-    public function checkCurrency($cart)
+    /**
+     * Check availables currencies for module
+     * 
+     * @return boolean
+     */
+    public function checkCurrency()
     {
-        $currency_order = new Currency($cart->id_currency);
-        $currencies_module = $this->getCurrency($cart->id_currency);
-
-        if (is_array($currencies_module)) {
-            foreach ($currencies_module as $currency_module) {
-                if ($currency_order->id == $currency_module['id_currency']) {
-                    return true;
-                }
-            }
+        if (in_array($this->context->currency->iso_code, $this->limited_currencies)) {
+            return true;
         }
         return false;
     }

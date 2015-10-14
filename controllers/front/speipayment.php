@@ -38,7 +38,7 @@ class OpenpayPrestashopSpeiPaymentModuleFrontController extends ModuleFrontContr
         parent::initContent();
 
         $cart = $this->context->cart;
-        if (!$this->module->checkCurrency($cart)) {
+        if (!$this->module->checkCurrency()) {
             Tools::redirect('index.php?controller=order');
         }
 
