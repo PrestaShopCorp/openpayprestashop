@@ -793,10 +793,7 @@ class OpenpayPrestashop extends PaymentModule
      */
     public function checkCurrency()
     {
-        if (in_array($this->context->currency->iso_code, $this->limited_currencies)) {
-            return true;
-        }
-        return false;
+        return in_array($this->context->currency->iso_code, $this->limited_currencies);
     }
 
     public function getPath()
